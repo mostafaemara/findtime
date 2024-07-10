@@ -1,11 +1,15 @@
 package com.mse.findtime
 
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 class TimeZoneHelperImpl:TimeZoneHelper {
     override fun getTimeZoneString(): List<String> {
@@ -48,7 +52,31 @@ class TimeZoneHelperImpl:TimeZoneHelper {
     }
 
     override fun search(startHour: Int, endHour: Int, timeZoneStrings: List<String>): List<Int> {
-        TODO("Not yet implemented")
+        val goodHours= mutableListOf<Int>()
+        val timeRange=IntRange(max(0,startHour),min(23,endHour))
+        val currentTimeZone=TimeZone.currentSystemDefault()
+
+        for(hour in timeRange){
+            var isGoodHour=false
+            for(zone in timeZoneStrings) {
+            val timeZone=TimeZone.of(zone)
+
+                if(timeZone==currentTimeZone){
+                    continue;
+            }
+                if(!isValid(timeRange=timeRange,hour=hour,currentTimeZone=currentTimeZone, otherTimeZone = timeZone)){
+                    Napier.d("Hour $hour is not valid for time range")
+                    isGoodHour=false
+                }else {
+                    Napier.d("Hour $hour is valid for time range")
+                    isGoodHour=true
+                }
+            }
+            if(isGoodHour){
+                goodHours.add(hour)
+            }
+        }
+        return  goodHours
     }
     private fun isValid(
         timeRange: IntRange,
@@ -62,7 +90,10 @@ class TimeZoneHelperImpl:TimeZoneHelper {
         val currentUTCInstant:Instant=Clock.System.now()
         val currentOtherDateTime=currentUTCInstant.toLocalDateTime(otherTimeZone)
         val otherDateTimeWithHour=LocalDateTime(currentOtherDateTime.year, currentOtherDateTime.month,currentOtherDateTime.dayOfMonth,currentOtherDateTime.hour,0,0,0)
-    TODO("Add Conversions")
+    val localInstant=otherDateTimeWithHour.toInstant(currentTimeZone)
+        val convertedTime=localInstant.toLocalDateTime(otherTimeZone)
+        Napier.d("Hour $hour in Time Range ${otherTimeZone.id} is ${convertedTime.hour}")
+        return convertedTime.hour in timeRange
     }
 
     fun formatDateTime(dateTime: LocalDateTime):String {
