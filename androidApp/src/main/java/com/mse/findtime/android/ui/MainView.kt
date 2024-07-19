@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.ui.tooling.preview.Preview
 
 sealed class Screen (val title:String) {
     object  TimeZonesScreen:Screen("Timezones")
@@ -42,6 +43,7 @@ val bottomNavigationItems= listOf(
     "Find Time"
 )
 )
+@Preview
 @Composable
 fun MainView(actionBarFun:topBarFun={ EmptyComposable()}){
     val showAddDialog = remember { mutableStateOf(false) }
@@ -60,17 +62,22 @@ var currentTimeZoneStrings= remember {
                 FloatingActionButton(
                     modifier = Modifier.padding(16.dp),
                     shape = FloatingActionButtonDefaults.largeShape,
-                    contentColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.primary,
                     onClick = {
                         showAddDialog.value =true;
                     }) {
-                    Icon(imageVector = Icons.Default.Add , contentDescription = "Add Timezone")
+                    Icon(imageVector = Icons.Default.Add ,
+
+                        contentDescription = "Add Timezone")
                     
                 }
 
             }
         }, bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
+            NavigationBar(
+
+
+                containerColor = MaterialTheme.colorScheme.primary) {
                 bottomNavigationItems.forEachIndexed() {
                     i,bottomNavigationItem->NavigationBarItem(
                     colors = NavigationBarItemColors(
@@ -89,8 +96,31 @@ var currentTimeZoneStrings= remember {
 
             }
         }) { padding->
-            Box (modifier = Modifier.padding(padding)) {
 
+            Box (modifier = Modifier.padding(padding)) {
+                if (showAddDialog.value) {
+                    AddTimeZoneDialog(
+// 2
+                        onAdd = { newTimezones ->
+                            showAddDialog.value = false
+                            for (zone in newTimezones) {
+// 3
+                                if (!currentTimeZoneStrings.contains(zone)) {
+                                    currentTimeZoneStrings.add(zone)
+                                }
+                            }
+                        },
+                        onDismiss = {
+// 4
+                            showAddDialog.value = false
+                        },
+                    )
+                }
+                when  (selectedIndex.intValue ) {
+
+                    0 -> TimeZoneScreen(currentTimeZoneStrings)
+ 1 -> FindMeetingScreen(currentTimeZoneStrings)
+                }
             }
 
         }

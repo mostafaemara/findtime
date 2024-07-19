@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-val startGradientColor = Color(0xFF1e88e5)
-val endGradientColor = Color(0xFF005cb2)
+val startGradientColor = Color(0xFF4F03D6)
+val endGradientColor = Color(0xFF9C27B0)
 
 @Composable
 fun MyApplicationTheme(
